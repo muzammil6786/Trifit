@@ -50,88 +50,83 @@ You can access the **API documentation** via Swagger at the following endpoint a
 
 
   ## Endpoints
-  POST /api/register
+
+### **1. User Registration**
+
+- **Endpoint**: `POST /api/register`  
+- **Request Body**:
+  ```json
   {
-  "username": "john_doe",
-  "pin": "1234",
-  "initialDeposit": 1000
-}
-Request body: 
+    "username": "john_doe",
+    "pin": "1234",
+    "initialDeposit": 1000
+  }
+Example Response:
 {
   "message": "User registered successfully",
   "accountNumber": "BANK-1234567"
 }
-
 Responses:
-200 OK: User registered successfully
-400 Bad Request: Missing fields or invalid data
-500 Internal Server Error: Server-side error
+200 OK: User registered successfully.
+400 Bad Request: Missing fields or invalid data.
+500 Internal Server Error: Server-side error.
 
-
-POST /api/login
-Logs in a user and returns a JWT token for authentication.
-Request body:
+### **2. User Login
+Endpoint: POST /api/login
+Request Body:
 {
   "username": "john_doe",
-  "pin": "1234",
+  "pin": "1234"
 }
 Responses:
-200 OK: Login successful, returns JWT token
-400 Bad Request: Invalid credentials
-500 Internal Server Error: Server-side error
+200 OK: Login successful, returns JWT token.
+400 Bad Request: Invalid credentials.
+500 Internal Server Error: Server-side error.
 
-
-
-POST /api/deposit
-Deposits an amount into the user's account after verifying the PIN.
-Request body:
+### **3. Deposit Money
+Endpoint: POST /api/deposit
+Request Body:
 {
   "amount": 1000,
   "pin": "1234"
 }
 Responses:
-200 OK: Deposit successful
-400 Bad Request: Missing amount or pin
-401 Unauthorized: Invalid token or PIN
-500 Internal Server Error: Server-side error
+200 OK: Deposit successful.
+400 Bad Request: Missing amount or PIN.
+401 Unauthorized: Invalid token or PIN.
+500 Internal Server Error: Server-side error.
 
-
-
-POST /api/withdraw
-Withdraws an amount from the user's account after verifying the PIN and JWT token.
-Request body:
+### **4. Withdraw Money
+Endpoint: POST /api/withdraw
+Request Body:
 {
   "amount": 500,
   "pin": "1234"
 }
 Responses:
-200 OK: Withdrawal successful
-400 Bad Request: Invalid PIN or Insufficient balance
-500 Internal Server Error: Server-side error
+200 OK: Withdrawal successful.
+400 Bad Request: Invalid PIN or insufficient balance.
+500 Internal Server Error: Server-side error.
 
-
-
-POST /api/transfer
-Transfers money to another user's account after verifying the PIN and JWT token.
-Request body:
+### **5. Transfer Money
+Endpoint: POST /api/transfer
+Request Body:
 {
   "recipientAccount": "BANK-1234567",
   "amount": 500,
   "pin": "1234"
 }
 Responses:
-200 OK: Transfer successful
-400 Bad Request: Invalid PIN, Insufficient balance, or Recipient not found
-500 Internal Server Error: Server-side error
+200 OK: Transfer successful.
+400 Bad Request: Invalid PIN, insufficient balance, or recipient not found.
+500 Internal Server Error: Server-side error.
 
-
-
-GET /api/account-statement
-Retrieves the user's account statement.
+### **6. Account Statement
+Endpoint: GET /api/account-statement
 Responses:
-200 OK: Account statement returned
-401 Unauthorized: Invalid or expired JWT token
-500 Internal Server Error: Server-side error
+200 OK: Account statement returned.
+401 Unauthorized: Invalid or expired JWT token.
+500 Internal Server Error: Server-side error.
 
 ## License
 
