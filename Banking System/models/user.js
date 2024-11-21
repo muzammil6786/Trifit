@@ -12,8 +12,27 @@ const UserSchema = new mongoose.Schema({
   transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }],
 });
 
+// Compare the PIN with the stored hash
 UserSchema.methods.comparePin = function (pin) {
   return bcrypt.compareSync(pin, this.pinHash);
+};
+
+// Reset failed login attempts after successful login
+UserSchema.methods.resetFailedLoginAttempts = function () {
+  this.failedLoginAttempts = 0;
+  this.isLocked = false;
+  this.lockUntil = null;
+  return this.save();
+};
+
+// Increment failed login attempts
+UserSchema.methods.incrementFailedLoginAttempts = function () {
+  this.failedLoginAttempts += 1;
+  if (this.failedLoginAttempts >= 3) {
+    this.isLocked = true;
+    this.lockUntil = Date.now() + 30 * 60 * 1000; // Lock for 30 minutes
+  }
+  return this.save();
 };
 
 module.exports = mongoose.model("User", UserSchema);

@@ -10,12 +10,15 @@
 
 <body>
 
-    <!-- Message div for showing success or error messages -->
-    <div id="message" style="display: none; font-weight: bold; color: black; background-color: yellow; padding: 10px;">
-    </div>
-
     <div class="container">
+
+        <!-- Message div for showing success or error messages -->
+        <div id="message"></div>
+
         <h1>Bank Account System</h1>
+
+        <!-- Add this Back Button wherever you'd like -->
+        <button id="back-button" onclick="goBack()" style="display: none;">Back</button>
 
         <!-- Registration Form -->
         <div id="registration-form" class="form-container">
@@ -27,48 +30,57 @@
         </div>
 
         <!-- Login Form -->
-        <div id="login-form" class="form-container">
+        <div id="login-form" class="form-container" style="display: none;">
             <h2>Login</h2>
-            <input type="text" id="login-username" placeholder="Username" required />
-            <input type="password" id="login-pin" placeholder="PIN" required />
-            <button onclick="login()">Login</button>
+            <input type="text" id="login-username" placeholder="Enter your username" />
+            <input type="password" id="login-pin" placeholder="Enter your PIN" />
+            <button id="login-button" onclick="login()">Login</button>
         </div>
 
-        <!-- Account Actions -->
-        <div id="account-actions" class="form-container" style="display: none;">
-            <h2>Welcome, <span id="user-name"></span></h2>
+        <!-- Account Actions Section -->
+        <div id="account-actions" style="display: none;">
+            <h3>Welcome, <span id="user-name"></span></h3>
+            <p id="user-account">Account Number: </p>
+            <p id="user-balance">Balance: </p>
 
-            <!-- Deposit -->
-        <div id="deposit-form">
-            <input type="number" id="deposit-amount" placeholder="Amount to deposit" />
-            <input type="password" id="deposit-pin" placeholder="Enter PIN" required />
-            <button onclick="deposit()">Deposit</button>
-        </div>
+            <div id="deposit-form">
+                <input type="number" id="deposit-amount" placeholder="Amount to deposit" />
+                <input type="password" id="deposit-pin" placeholder="Enter PIN" required />
+                <button onclick="deposit()">Deposit</button>
+            </div>
 
-
-            <!-- Withdrawal -->
             <div id="withdraw-form">
                 <input type="number" id="withdraw-amount" placeholder="Amount to withdraw" />
+                <input type="password" id="withdraw-pin" placeholder="Enter PIN" required />
                 <button onclick="withdraw()">Withdraw</button>
             </div>
 
-            <!-- Transfer -->
-            <div id="transfer-form">
-                <input type="text" id="transfer-to" placeholder="Recipient's username" />
-                <input type="number" id="transfer-amount" placeholder="Amount to transfer" />
+            <div id="transfer-section">
+                <input type="text" id="recipient-account" placeholder="Recipient Account" />
+                <input type="number" id="transfer-amount" placeholder="Transfer Amount" />
+                <input type="password" id="transfer-pin" placeholder="PIN" />
                 <button onclick="transfer()">Transfer</button>
             </div>
 
-            <!-- Account Statement -->
-            <div id="account-statement">
-                <button onclick="viewStatement()">View Account Statement</button>
-                <ul id="statement-list"></ul>
+            <button id="view-statement-button" onclick="viewStatement()">View Account Statement</button>
+            <div id="statement-container" style="display:none;">
+                <table id="statement-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statement-body">
+                        <!-- Transactions will be dynamically added here -->
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Logout -->
             <button onclick="logout()">Logout</button>
         </div>
-
 
     </div>
 
