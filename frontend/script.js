@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:4500"; // Your API URL
+const apiUrl = "https://trifit-vy10.onrender.com"; // Your API URL
 let token = ""; // For storing the JWT token
 
 const showMessage = (message, isError = false) => {
