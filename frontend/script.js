@@ -1,11 +1,18 @@
 const apiUrl = "https://trifit-vy10.onrender.com"; // Your API URL
 let token = ""; // For storing the JWT token
 
-const showMessage = (message, isError = false) => {
+function showMessage(message, isError = false) {
   const messageDiv = document.getElementById("message");
-  messageDiv.textContent = message;
-  messageDiv.style.color = isError ? "red" : "green";
-};
+
+  if (messageDiv) {
+    messageDiv.textContent = message;
+    messageDiv.style.color = isError ? "red" : "green";
+    messageDiv.style.display = "block"; // Make the message div visible
+  }
+}
+
+
+
 
 const register = async () => {
   const username = document.getElementById("reg-username").value;
@@ -69,34 +76,38 @@ const logout = async () => {
   }
 };
 
-const deposit = async () => {
-  const amount = parseFloat(document.getElementById("deposit-amount").value);
+function deposit() {
+  const token = localStorage.getItem("authToken"); // Retrieve the token from localStorage
+  const amount = document.getElementById("deposit-amount").value;
   const pin = document.getElementById("deposit-pin").value;
-  const token = localStorage.getItem("jwtToken"); // Or use sessionStorage if you prefer
 
-  try {
-    const response = await fetch(`${apiUrl}/api/deposit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ amount, pin }),
+  fetch("https://trifit-vy10.onrender.com/api/deposit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Include the token here
+    },
+    body: JSON.stringify({
+      amount: amount,
+      pin: pin,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Deposit Response:", data);
+      if (data.message) {
+        // Display success or failure message
+        document.getElementById("message").innerText = data.message;
+        document.getElementById("message").style.display = "block";
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      document.getElementById("message").innerText = "An error occurred";
+      document.getElementById("message").style.display = "block";
     });
+}
 
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage(data.message);
-      updateBalance(data.balanceAfterTransaction);
-    } else {
-      showMessage(data.message, true);
-    }
-  } catch (error) {
-    console.error("Error during deposit:", error);
-    showMessage("An error occurred while processing the deposit", true);
-  }
-};
 
 
 const withdraw = async () => {
@@ -115,6 +126,7 @@ const withdraw = async () => {
     });
 
     const data = await response.json();
+    console.log("Withdraw response:", data); // Debugging log
 
     if (response.ok) {
       showMessage(data.message);
@@ -133,7 +145,16 @@ const transfer = async () => {
   const recipientAccount = document.getElementById("recipient-account").value;
   const amount = parseFloat(document.getElementById("transfer-amount").value);
   const pin = document.getElementById("transfer-pin").value;
-  const token = localStorage.getItem("jwtToken");
+
+  if (!recipientAccount) {
+    showMessage("Please enter a valid recipient account.", true);
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+    showMessage("Please enter a valid transfer amount.", true);
+    return;
+  }
 
   try {
     const response = await fetch(`${apiUrl}/api/transfer`, {
@@ -148,7 +169,9 @@ const transfer = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      showMessage(data.message);
+      showMessage(
+        `Transfer successful to ${recipientAccount}! New Balance: ${data.balanceAfterTransaction}`
+      );
       updateBalance(data.balanceAfterTransaction);
     } else {
       showMessage(data.message, true);
@@ -161,7 +184,7 @@ const transfer = async () => {
 
 
 const viewStatement = async () => {
-  const response = await fetch(`${apiUrl}/api/statement`, {
+  const response = await fetch(`${apiUrl}/api/accountstatement`, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -5,10 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Account System</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+    <!-- Message div for showing success or error messages -->
+    <div id="message" style="display: none; font-weight: bold; color: black; background-color: yellow; padding: 10px;">
+    </div>
+
     <div class="container">
         <h1>Bank Account System</h1>
 
@@ -22,7 +27,7 @@
         </div>
 
         <!-- Login Form -->
-        <div id="login-form" class="form-container" >
+        <div id="login-form" class="form-container">
             <h2>Login</h2>
             <input type="text" id="login-username" placeholder="Username" required />
             <input type="password" id="login-pin" placeholder="PIN" required />
@@ -34,10 +39,12 @@
             <h2>Welcome, <span id="user-name"></span></h2>
 
             <!-- Deposit -->
-            <div id="deposit-form">
-                <input type="number" id="deposit-amount" placeholder="Amount to deposit" />
-                <button onclick="deposit()">Deposit</button>
-            </div>
+        <div id="deposit-form">
+            <input type="number" id="deposit-amount" placeholder="Amount to deposit" />
+            <input type="password" id="deposit-pin" placeholder="Enter PIN" required />
+            <button onclick="deposit()">Deposit</button>
+        </div>
+
 
             <!-- Withdrawal -->
             <div id="withdraw-form">
@@ -62,8 +69,7 @@
             <button onclick="logout()">Logout</button>
         </div>
 
-        <!-- Error or Success Message -->
-        <div id="message"></div>
+
     </div>
 
     <script src="script.js"></script>

@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Transaction = require("../models/transaction");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 // Deposit
 exports.deposit = async (req, res) => {
   const { amount, pin } = req.body;
@@ -33,14 +34,14 @@ exports.deposit = async (req, res) => {
 // Withdraw
 exports.withdraw = async (req, res) => {
   const { amount, pin } = req.body;
-  const token = req.header("Authorization").split(" ")[1]; // Get JWT token from Authorization header
+  const token = req.header("Authorization").split(" ")[1]; 
 
   if (!amount || amount <= 0) {
     return res.status(400).json({ message: "Amount must be greater than 0" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "muz");
+    const decoded = jwt.verify(token, "muz");
     const user = await User.findOne({ where: { _id: decoded.id } });
 
     if (!user || !bcrypt.compareSync(pin, user.pin)) {
