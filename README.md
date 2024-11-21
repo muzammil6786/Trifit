@@ -32,7 +32,7 @@ This project is a Banking System API that supports various features including us
 
 The frontend is deployed and can be accessed at:
 
-**Frontend URL**: [https://helpful-druid-f852f8.netlify.app/]
+**Frontend URL**: [https://preeminent-jelly-db8274.netlify.app/]
 
 ---
 
@@ -40,7 +40,7 @@ The frontend is deployed and can be accessed at:
 
 The backend is deployed and can be accessed at:
 
-**Backend URL**: [https://trifit-vy10.onrender.com]
+**Backend URL**: [https://trifit-oueu.onrender.com"]
 
 ---
 
