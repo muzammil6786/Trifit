@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Account System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Bank Account System</h1>
+
+        <!-- Registration Form -->
+        <div id="registration-form" class="form-container">
+            <h2>Register</h2>
+            <input type="text" id="reg-username" placeholder="Username" required />
+            <input type="password" id="reg-pin" placeholder="4-digit PIN" required />
+            <input type="number" id="reg-deposit" placeholder="Initial Deposit (optional)" />
+            <button onclick="register()">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="form-container" >
+            <h2>Login</h2>
+            <input type="text" id="login-username" placeholder="Username" required />
+            <input type="password" id="login-pin" placeholder="PIN" required />
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Account Actions -->
+        <div id="account-actions" class="form-container" style="display: none;">
+            <h2>Welcome, <span id="user-name"></span></h2>
+
+            <!-- Deposit -->
+            <div id="deposit-form">
+                <input type="number" id="deposit-amount" placeholder="Amount to deposit" />
+                <button onclick="deposit()">Deposit</button>
+            </div>
+
+            <!-- Withdrawal -->
+            <div id="withdraw-form">
+                <input type="number" id="withdraw-amount" placeholder="Amount to withdraw" />
+                <button onclick="withdraw()">Withdraw</button>
+            </div>
+
+            <!-- Transfer -->
+            <div id="transfer-form">
+                <input type="text" id="transfer-to" placeholder="Recipient's username" />
+                <input type="number" id="transfer-amount" placeholder="Amount to transfer" />
+                <button onclick="transfer()">Transfer</button>
+            </div>
+
+            <!-- Account Statement -->
+            <div id="account-statement">
+                <button onclick="viewStatement()">View Account Statement</button>
+                <ul id="statement-list"></ul>
+            </div>
+
+            <!-- Logout -->
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Error or Success Message -->
+        <div id="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
