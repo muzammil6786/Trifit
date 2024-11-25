@@ -32,7 +32,7 @@ This project is a Banking System API that supports various features including us
 
 The frontend is deployed and can be accessed at:
 
-**Frontend URL**: [https://friendly-dolphin-53cc22.netlify.app/]
+**Frontend URL**: [https://radiant-chaja-6325a8.netlify.app/]
 
 ---
 
@@ -40,13 +40,14 @@ The frontend is deployed and can be accessed at:
 
 The backend is deployed and can be accessed at:
 
-**Backend URL**: [https://trifit-s8k8.onrender.com]
+**Backend URL**: [https://trifit-1pby.onrender.com/]
 
 ---
 
 ## API Documentation (Swagger)
 
-You can access the **API documentation** via Swagger at the following endpoint after starting the Server: http://localhost:4500/api-docs/#/
+You can access the **API documentation** via Swagger at the following endpoint:
+**Swgger URL**: [https://trifit-1pby.onrender.com/api-docs/]
 
 
   ## Endpoints
