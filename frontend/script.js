@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:4500"; // Your API URL
+const apiUrl = "https://trifit-s8k8.onrender.com"; // Your API URL
 
 // Function to show messages (success/error)
 const showMessage = (message, isError = false) => {
