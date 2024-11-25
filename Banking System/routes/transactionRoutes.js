@@ -10,18 +10,14 @@ const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 
-router.get("/balance",authMiddleware, getBalance);
-
-
 // Deposit
+router.post("/deposit", authMiddleware, deposit);
 /**
  * @swagger
  * /api/deposit:
  *   post:
- *     summary: Deposit money into the user's account
- *     description: Deposits an amount into the user's account after verifying the PIN.
- *     security:
- *       - bearerAuth: []
+ *     summary: Deposit money to the account
+ *     description: Deposits a specified amount to the user's account after PIN verification.
  *     requestBody:
  *       required: true
  *       content:
@@ -31,6 +27,7 @@ router.get("/balance",authMiddleware, getBalance);
  *             properties:
  *               amount:
  *                 type: number
+ *                 format: float
  *                 example: 1000
  *               pin:
  *                 type: string
@@ -45,31 +42,26 @@ router.get("/balance",authMiddleware, getBalance);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Deposit of 1000 successful"
- *                 balance:
- *                   type: number
- *                   example: 5000
+ *                   example: "Deposited 1000. New balance is 5000"
  *       400:
- *         description: Bad request (e.g., missing amount or pin)
+ *         description: Invalid amount
  *       401:
- *         description: Unauthorized (Invalid token or PIN)
- *       404:
- *         description: User not found
+ *         description: Invalid PIN
+ *       403:
+ *         description: Account locked
  *       500:
- *         description: Internal server error (check logs for more details)
+ *         description: Internal server error
  */
 
-router.post("/deposit", authMiddleware, deposit);
-
 // Withdraw
+router.post("/withdraw", authMiddleware, withdraw);
+
 /**
  * @swagger
  * /api/withdraw:
  *   post:
- *     summary: Withdraw money from the user's account
- *     description: Withdraws an amount from the user's account after verifying the PIN and JWT token.
- *     security:
- *       - bearerAuth: []
+ *     summary: Withdraw money from the account
+ *     description: Withdraws a specified amount from the user's account after PIN verification.
  *     requestBody:
  *       required: true
  *       content:
@@ -79,6 +71,7 @@ router.post("/deposit", authMiddleware, deposit);
  *             properties:
  *               amount:
  *                 type: number
+ *                 format: float
  *                 example: 500
  *               pin:
  *                 type: string
@@ -93,36 +86,30 @@ router.post("/deposit", authMiddleware, deposit);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Withdrawn 500. New balance is 500"
- *                 transaction:
- *                   type: object
- *                   properties:
- *                     type:
- *                       type: string
- *                       example: "Withdrawal"
- *                     amount:
- *                       type: number
- *                       example: 500
- *                     balanceAfterTransaction:
- *                       type: number
- *                       example: 500
+ *                   example: "Withdrawn 500. New balance is 4500"
  *       400:
- *         description: Invalid PIN or Insufficient balance
+ *         description: Invalid amount
+ *       401:
+ *         description: Invalid PIN
+ *       403:
+ *         description: Insufficient balance
  *       500:
  *         description: Internal server error
  */
 
-router.post("/withdraw", authMiddleware, withdraw);
 
-// Transfer
+
+
+
+//Transfer
+
+router.post("/transfer", authMiddleware, transfer);
 /**
  * @swagger
  * /api/transfer:
  *   post:
- *     summary: Transfer money to another user
- *     description: Transfers an amount to a recipient's account after verifying the PIN and JWT token.
- *     security:
- *       - bearerAuth: []
+ *     summary: Transfer money between accounts
+ *     description: Transfers a specified amount from one user's account to another user's account after PIN verification.
  *     requestBody:
  *       required: true
  *       content:
@@ -130,12 +117,13 @@ router.post("/withdraw", authMiddleware, withdraw);
  *           schema:
  *             type: object
  *             properties:
- *               recipientAccount:
- *                 type: string
- *                 example: "BANK-1234567"
  *               amount:
  *                 type: number
+ *                 format: float
  *                 example: 500
+ *               recipientAccount:
+ *                 type: string
+ *                 example: "BANK-8006210"
  *               pin:
  *                 type: string
  *                 example: "1234"
@@ -149,45 +137,47 @@ router.post("/withdraw", authMiddleware, withdraw);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Transferred 500 to BANK-1234567. New balance: 500"
- *                 transaction:
- *                   type: object
- *                   properties:
- *                     type:
- *                       type: string
- *                       example: "Transfer"
- *                     amount:
- *                       type: number
- *                       example: 500
- *                     senderAccount:
- *                       type: string
- *                       example: "BANK-9876543"
- *                     recipientAccount:
- *                       type: string
- *                       example: "BANK-1234567"
- *                     balanceAfterTransaction:
- *                       type: number
- *                       example: 500
+ *                   example: "Transfer successful. New balance is 4500."
  *       400:
- *         description: Invalid PIN, Insufficient balance or Recipient not found
+ *         description: Invalid amount or account number
+ *       401:
+ *         description: Invalid PIN
+ *       403:
+ *         description: Insufficient balance
+ *       404:
+ *         description: Recipient account not found
  *       500:
  *         description: Internal server error
  */
 
-router.post("/transfer", authMiddleware, transfer);
 
-// Get Account Statement
+
+//account transactions
+router.get("/accountstatement", authMiddleware, getAccountStatement);
 /**
  * @swagger
- * /api/accountstatement:
+ * /api/accountStatement:
  *   get:
- *     summary: Get the account statement (transaction history) for the authenticated user
- *     description: Retrieves all transactions for the authenticated user, sorted by the most recent.
- *     security:
- *       - bearerAuth: []
+ *     summary: Get account statement
+ *     description: Retrieves the statement of transactions for the user's account, including deposits, withdrawals, and transfers.
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2024-11-01"
+ *       - in: query
+ *         name: endDate
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2024-12-31"
  *     responses:
  *       200:
- *         description: Returns a list of transactions
+ *         description: Account statement retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -198,26 +188,67 @@ router.post("/transfer", authMiddleware, transfer);
  *                   items:
  *                     type: object
  *                     properties:
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         example: "2024-11-01"
  *                       type:
  *                         type: string
  *                         example: "Deposit"
  *                       amount:
  *                         type: number
+ *                         format: float
  *                         example: 1000
- *                       balanceAfterTransaction:
+ *                       balance:
  *                         type: number
- *                         example: 1000
- *                       timestamp:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-11-21T10:00:00Z"
- *       404:
- *         description: No transactions found
+ *                         format: float
+ *                         example: 5000
+ *       400:
+ *         description: Invalid date format
+ *       401:
+ *         description: Unauthorized access
  *       500:
- *         description: Failed to fetch account statement
+ *         description: Internal server error
  */
 
-router.get("/accountstatement", authMiddleware, getAccountStatement);
+//account balance
+router.get("/balance", authMiddleware, getBalance);
+/**
+ * @swagger
+ * /api/balance:
+ *   get:
+ *     summary: Get account balance
+ *     description: Fetches the current balance of the user's account.
+ *     responses:
+ *       200:
+ *         description: Balance fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 balance:
+ *                   type: number
+ *                   format: float
+ *                   example: 5000
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Internal server error
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;
  

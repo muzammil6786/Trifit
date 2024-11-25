@@ -3,7 +3,9 @@ const { register, login, logout } = require("../controller/authController");
 const router = express.Router();
 
 
-/**
+
+
+ /**
  * @swagger
  * /api/register:
  *   post:
@@ -50,14 +52,15 @@ const router = express.Router();
  *                   type: string
  *                   example: Error message
  */
-router.post("/register", register);
 
+ router.post("/register", register);
+ 
 /**
  * @swagger
  * /api/login:
  *   post:
- *     summary: Login to an existing user account
- *     description: Authenticates a user based on their username and PIN, and returns a JWT token.
+ *     summary: User login
+ *     description: Logs in a user by verifying their username and pin. If successful, returns a JWT token and user details.
  *     requestBody:
  *       required: true
  *       content:
@@ -73,7 +76,7 @@ router.post("/register", register);
  *                 example: "1234"
  *     responses:
  *       200:
- *         description: Login successful, returns a JWT token and transaction history
+ *         description: Login successful
  *         content:
  *           application/json:
  *             schema:
@@ -84,27 +87,71 @@ router.post("/register", register);
  *                   example: Login successful
  *                 token:
  *                   type: string
- *                   example: your-jwt-token
+ *                   example: "jwt_token_here"
+ *                 username:
+ *                   type: string
+ *                   example: john_doe
+ *                 accountNumber:
+ *                   type: string
+ *                   example: BANK-1234567
+ *                 balance:
+ *                   type: number
+ *                   example: 1000.0
  *                 transactionHistory:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
- *                       transactionId:
- *                         type: string
- *                         example: "txn123"
- *                       amount:
- *                         type: number
- *                         example: 100
  *                       date:
  *                         type: string
- *                         example: "2024-11-21T10:00:00Z"
+ *                         format: date
+ *                         example: "2024-11-25"
+ *                       transactionType:
+ *                         type: string
+ *                         example: "deposit"
+ *                       amount:
+ *                         type: number
+ *                         example: 500.0
  *       401:
  *         description: Invalid PIN
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid PIN. You have 2 attempts left.
+ *       403:
+ *         description: Account locked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Account locked. Try again after 2024-11-25 15:30.
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
 
 router.post("/login", login);

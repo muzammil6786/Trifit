@@ -1,32 +1,31 @@
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
-// definition
 // Define Swagger options
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'Banking API',
-      version: '1.0.0',
-      description: 'API for banking transactions (Deposit, Withdrawal, etc.)'
+      title: "Banking API",
+      version: "1.0.0",
+      description: "Banking transactions API",
     },
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      }
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", // Optional: Helps Swagger UI to understand JWT format
+        },
+      },
     },
     security: [
       {
-        bearerAuth: []
-      }
-    ]
+        bearerAuth: [], // This applies to all routes by default
+      },
+    ],
   },
-  apis: ['./routes/*.js'] // path to the API routes files
+  apis: ["./routes/*.js"], // Path to your route files
 };
 
 
