@@ -28,7 +28,7 @@ UserSchema.methods.resetFailedLoginAttempts = function () {
 // Increment failed login attempts
 UserSchema.methods.incrementFailedLoginAttempts = function () {
   this.failedLoginAttempts += 1;
-  if (this.failedLoginAttempts >= 3) {
+  if (this.failedLoginAttempts >= 2) {
     this.isLocked = true;
     this.lockUntil = Date.now() + 30 * 60 * 1000; // Lock for 30 minutes
   }

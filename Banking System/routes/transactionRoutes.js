@@ -4,12 +4,13 @@ const {
   withdraw,
   transfer,
   getAccountStatement,
+  getBalance,
 } = require("../controller/transactionController");
 const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 
-
+router.get("/balance",authMiddleware, getBalance);
 
 
 // Deposit

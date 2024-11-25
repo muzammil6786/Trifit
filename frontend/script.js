@@ -66,6 +66,8 @@ const login = async () => {
 
     const data = await response.json();
 
+    console.log("Login response:", data); // Log response to confirm
+
     if (response.ok) {
       // Handle successful login
       showMessage("Login successful!");
@@ -75,6 +77,9 @@ const login = async () => {
       localStorage.setItem("username", data.username);
       localStorage.setItem("accountNumber", data.accountNumber);
       localStorage.setItem("balance", data.balance);
+
+      // Log the stored token
+      console.log("Stored JWT Token:", localStorage.getItem("jwtToken"));
 
       // Update UI with user details
       updateUserInfo(data.username, data.accountNumber, data.balance);
@@ -92,6 +97,17 @@ const login = async () => {
     showMessage("An error occurred during login.", true);
   }
 };
+
+
+
+
+function refreshPage(delay = 2000) {
+  // Delay the refresh to allow messages or modals to display
+  setTimeout(() => {
+    location.reload();
+  }, delay);
+}
+
 
 // Update user info on the page after login
 const updateUserInfo = (username, accountNumber, balance) => {
@@ -127,8 +143,10 @@ const deposit = async () => {
     const data = await response.json();
 
     if (response.ok) {
+      refreshPage();
       showMessage(data.message);
       updateBalance(data.balanceAfterTransaction);
+      
     } else {
       showMessage(data.message || "An error occurred during deposit.", true);
     }
@@ -161,8 +179,10 @@ const withdraw = async () => {
     const data = await response.json();
 
     if (response.ok) {
+        refreshPage();
       showMessage(data.message);
       updateBalance(data.balanceAfterTransaction);
+    
     } else {
       showMessage(data.message || "An error occurred during withdrawal.", true);
     }
@@ -196,8 +216,10 @@ const transfer = async () => {
     const data = await response.json();
 
     if (response.ok) {
+       refreshPage();
       showMessage(data.message);
       updateBalance(data.balanceAfterTransaction);
+     
     } else {
       showMessage(data.message || "An error occurred during transfer.", true);
     }
@@ -262,86 +284,117 @@ const goBack = () => {
 /////
 
 // Function to fetch and display the account statement
-async function viewStatement() {
-  const token = localStorage.getItem("jwtToken"); // Get JWT token from localStorage
+const viewStatement = async () => {
+  const token = localStorage.getItem("jwtToken");
+  const statementContainer = document.getElementById("statement-container");
 
   if (!token) {
-    alert("Please log in to view your account statement.");
+    alert("Please log in to view the account statement.");
     return;
   }
 
   try {
-    // Show loading state
-    document.getElementById('statement-container').style.display = 'none'; // Hide statement initially
-    document.getElementById('loadingMessage').style.display = 'block'; // Show loading message
-    const response = await fetch("/api/account/statement", {
+    const response = await fetch(`${apiUrl}/api/accountstatement`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Add JWT token to Authorization header
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      const transactions = data.transactions;
-
-      // Hide loading message and display the statement container
-      document.getElementById('loadingMessage').style.display = 'none';
-      document.getElementById('statement-container').style.display = 'block';
-
-      const statementBody = document.getElementById('statement-body');
-      statementBody.innerHTML = ''; // Clear any existing statement data
-
-      if (transactions.length === 0) {
-        const noTransactionsMessage = document.createElement('tr');
-        const noTransactionsMessageContent = document.createElement('td');
-        noTransactionsMessageContent.colSpan = 4;
-        noTransactionsMessageContent.innerText = 'No transactions found.';
-        noTransactionsMessage.appendChild(noTransactionsMessageContent);
-        statementBody.appendChild(noTransactionsMessage);
-      } else {
-        // Populate the statement table with transaction data
-        transactions.forEach(transaction => {
-          const row = document.createElement('tr');
-          
-          // Create and append Date cell
-          const dateCell = document.createElement('td');
-          dateCell.textContent = new Date(transaction.timestamp).toLocaleString();
-          row.appendChild(dateCell);
-          
-          // Create and append Amount cell
-          const amountCell = document.createElement('td');
-          amountCell.textContent = `$${transaction.amount.toFixed(2)}`;
-          row.appendChild(amountCell);
-          
-          // Create and append Type cell
-          const typeCell = document.createElement('td');
-          typeCell.textContent = transaction.type;
-          row.appendChild(typeCell);
-          
-          // Create and append Description cell
-          const descriptionCell = document.createElement('td');
-          descriptionCell.textContent = transaction.description || 'N/A';
-          row.appendChild(descriptionCell);
-
-          statementBody.appendChild(row);
-        });
-      }
-    } else {
-      const errorData = await response.json();
-      console.error("Error fetching statement:", errorData.message);
-      alert("An error occurred: " + errorData.message);
+    if (!response.ok) {
+      throw new Error("Failed to fetch account statement.");
     }
+
+    const data = await response.json();
+    const transactions = data.transactions;
+    const statementBody = document.getElementById("statement-body");
+    statementBody.innerHTML = "";
+
+    // Check if transactions exist, and display accordingly
+    if (transactions.length > 0) {
+      // Reverse the transactions array to show the latest transactions at the top
+      transactions.reverse();
+
+      transactions.forEach((transaction) => {
+        const row = document.createElement("tr");
+
+        // Format the timestamp
+        const formattedDateTime = transaction.timestamp || "Invalid Date";
+
+        // Amount (full amount before fee)
+        const amount =
+          typeof transaction.amount === "number" && !isNaN(transaction.amount)
+            ? `₹${transaction.amount.toFixed(2)}`
+            : "₹0.00"; // Default to "₹0.00" if amount is invalid or undefined
+
+        const type = transaction.type || "Unknown"; // Fallback to "Unknown" if type is missing
+
+        row.innerHTML = `
+          <td>${formattedDateTime}</td>
+          <td>${amount}</td> <!-- Only show the amount -->
+          <td>${type}</td>
+        `;
+
+        statementBody.appendChild(row);
+      });
+    } else {
+      // If no transactions, display a message for the user
+      const emptyRow = document.createElement("tr");
+      emptyRow.innerHTML = `<td colspan="3" style="text-align: center;">You have no transactions yet.</td>`;
+      statementBody.appendChild(emptyRow);
+    }
+
+    // Toggle the visibility of the statement container
+    statementContainer.style.display =
+      statementContainer.style.display === "none" ? "block" : "none";
   } catch (error) {
-    console.error("Error:", error);
-    alert("An error occurred while fetching the account statement.");
+    console.error("Error fetching account statement:", error);
   }
-}
-
-// Example of how to show a loading message when the account statement is being fetched
-document.getElementById('view-statement-button').addEventListener('click', function() {
-  viewStatement();
-});
+};
 
 
+
+
+
+const updateBalanceInUI = (balance) => {
+  document.getElementById(
+    "user-balance"
+  ).innerText = `Balance: $${balance.toFixed(2)}`;
+};
+
+/////////////
+        // Function to fetch balance from the API
+         const fetchBalance = async () => {
+           const token = localStorage.getItem("jwtToken");
+          //  console.log("Token:", token); // Check if the token is null, undefined, or incorrect
+
+           if (!token) {
+             console.error("Token is missing");
+             return;
+           }
+
+           try {
+             const response = await fetch(`${apiUrl}/api/balance`, {
+               method: "GET",
+               headers: {
+                 Authorization: `Bearer ${token}`, // Send the token in the request
+               },
+             });
+
+             if (!response.ok) {
+               throw new Error("Failed to fetch balance");
+             }
+
+             const data = await response.json();
+            //  console.log("Balance Response:", data); // Check the response data
+
+             const balance = data.balance;
+             updateBalanceInUI(balance);
+           } catch (error) {
+             console.error("Error fetching balance:", error);
+           }
+         };
+         window.onload = function () {
+           console.log("Page is loaded, calling fetchBalance");
+           fetchBalance();
+         };

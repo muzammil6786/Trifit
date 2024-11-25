@@ -118,6 +118,7 @@ exports.withdraw = async (req, res) => {
 };
 
 // Transfer
+// In your transfer function
 exports.transfer = async (req, res) => {
   const { recipientAccount, amount, pin } = req.body;
   const token = req.header("Authorization").split(" ")[1];
@@ -161,24 +162,27 @@ exports.transfer = async (req, res) => {
 
     // Step 7: Check if recipient's account is locked (blocked)
     if (recipient.isLocked) {
-      return res
-        .status(400)
-        .json({ message: "Recipient's account is blocked" });
-    }
-
-    // Step 8: Check if sender has sufficient balance for the transfer
-    if (sender.balance < amount) {
-      return res.status(400).json({ message: "Insufficient balance" });
+      const lockTime = Date.now() + 30 * 60 * 1000; // Add 30 minutes
+      const readableTime = new Date(lockTime).toLocaleString();
+      return res.status(400).json({
+        message: `Recipient's account is locked please try again ${readableTime} `,
+      });
     }
 
     // Step 9: Deduct amount from sender's balance and add to recipient's balance
-    sender.balance -= amount;
+    const fee = amount * 0.02; // 2% fee calculation
+    const transferAmount = amount - fee; // The amount that will actually be transferred after fee
+
+    // Deduct the transfer amount (after fee) from sender's balance
+    sender.balance -= transferAmount;
+    // Add the full amount to the recipient's balance
     recipient.balance += amount;
 
-    // Step 10: Create transaction record with user field
+    // Step 10: Create transaction record with fee field
     const transaction = new Transaction({
       type: "Transfer",
-      amount,
+      amount, // Full amount (before fee)
+      fee, // The calculated fee
       senderAccount: sender.accountNumber,
       recipientAccount: recipient.accountNumber,
       balanceAfterTransaction: sender.balance,
@@ -199,7 +203,9 @@ exports.transfer = async (req, res) => {
 
     // Step 14: Send success response with transaction details
     res.status(200).json({
-      message: `Transferred ${amount} to ${recipientAccount}. New balance: ${sender.balance}`,
+      message: `Transferred ${amount} to ${recipientAccount}. Transaction fee: ₹${fee.toFixed(
+        2
+      )}. New balance: ₹${sender.balance}`,
       transaction: savedTransaction,
     });
   } catch (error) {
@@ -211,36 +217,87 @@ exports.transfer = async (req, res) => {
 };
 
 
-exports.getAccountStatement = async (req, res) => {
-  try {
-    const token = req.header("Authorization").split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Token is required" });
-    }
 
+// get Transfer History
+exports.getAccountStatement = async (req, res) => {
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Access token required" });
+  }
+
+  try {
     const decoded = jwt.verify(token, "muz");
     const userId = decoded.id;
 
-    console.log("Decoded User ID:", userId);
-
-    // Fetch transactions for the authenticated user
-    const transactions = await Transaction.find({ user: userId })
-      .sort({ timestamp: -1 })
-      .exec();
-
-    console.log("Total Transactions Fetched:", transactions.length);
-    console.log("Transaction Data:", transactions);
-
-    if (transactions.length === 0) {
-      return res.status(404).json({ message: "No transactions found" });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json({ transactions });
-  } catch (error) {
-    console.error("Error fetching account statement:", error);
-    res.status(500).json({
-      message: "Failed to fetch account statement",
-      error: error.message,
+    // Fetch detailed data for each transaction ID
+    const transactions = await Promise.all(
+      user.transactions.slice(-10).map(async (transactionId) => {
+        const transaction = await Transaction.findById(transactionId); // Assuming 'Transaction' is your model
+        if (!transaction) {
+          return null; // If transaction not found, return null
+        }
+
+        // Format the timestamp as a full date and time
+        const timestamp = new Date(transaction.timestamp);
+        const formattedDateTime =
+          timestamp instanceof Date && !isNaN(timestamp)
+            ? timestamp.toLocaleString() // This will include both date and time
+            : "Invalid Date";
+
+        return {
+          timestamp: formattedDateTime,
+          amount: transaction.amount || 0,
+          type: transaction.type || "Unknown",
+        };
+      })
+    );
+
+    // Remove null transactions (those that couldn't be found)
+    const validTransactions = transactions.filter(
+      (transaction) => transaction !== null
+    );
+
+    res.json({
+      transactions: validTransactions,
     });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+
+
+exports.getBalance = async (req, res) => {
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Access token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "muz");
+    const userId = decoded.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      balance: user.balance,
+      accountNumber: user.accountNumber,
+    });
+  } catch (error) {
+    console.error("Error fetching balance:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
